@@ -1,7 +1,10 @@
 #CODE from: https://www.youtube.com/watch?v=3QiPPX-KeSc
+#CODE from: https://gist.github.com/Oborichkin/d8d0c7823fd6db3abeb25f69352a5299 
+#CODE from: https://github.com/bopace/generate-primes/blob/master/prime.py 
 #TLS (SSL) library from: https://docs.python.org/3/library/ssl.html 
+#Passwords to all keys and certs are 112233
 
-#Permprase to all keys and certs are 112233
+import random
 import socket
 import threading
 import ssl
@@ -28,20 +31,96 @@ server.bind(ADDR)
 #================== CLIENT CONNECTION ====================
 def handle_client(conn, addr):
     print(f"[CLIENT CONNECTED]: {addr}") 
+  
+    g, p = setup(conn, addr)
+    c = int(server_recive(conn, addr))
+    print("[RECIVED COMMIT]")
+    #print(f"[ALICE COMMIT] = {c}")
+    d = roll(conn, addr)
+    r = int(server_recive(conn, addr))
+    a = int(server_recive(conn, addr))
+    print(f"[RECIVED] randint {r}, Alice guess {a}")
+    if open(g, p, r, a, c): 
+        print("[COMMIT ACCEPTED]")
+        server_send(conn, addr, "ACCEPTED")
+        result(conn, addr, a, d)
+    else: 
+        print("[COMMIT NOT ACCEPTED]")
+        server_send(conn, addr, "NOT ACCEPTED")
 
-    connected = True
-    while connected: 
-        msg_lenght = conn.recv(HEADER).decode(FORMAT) #Blocking line of code
-        if msg_lenght: #Message lenght not null
-            msg_lenght = int(msg_lenght)
-            msg = conn.recv(msg_lenght).decode(FORMAT) #Actual Message
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-
-            print(f"[{addr}] {msg}")
-            conn.send("[MESSAGE RECIVED]".encode(FORMAT))
+    print("")
     conn.close() 
  
+
+#================== RECIVE MESSAGES ====================
+def server_recive(conn, addr):
+    msg_lenght = conn.recv(HEADER).decode(FORMAT) #Blocking line of code
+    connected = True
+    if msg_lenght: #Message lenght not null
+        msg_lenght = int(msg_lenght)
+        msg = conn.recv(msg_lenght).decode(FORMAT) #Actual Message
+
+        return msg
+
+
+#================== SEND MESSAGES ====================
+def server_send(conn, addr, msg):
+    conn.send(msg.encode(FORMAT))
+
+
+#================== CHECK IF NUMBER IS PRIME ====================
+def is_prime(num, test_count):
+    if num == 1:
+        return False
+    if test_count >= num:
+        test_count = num - 1
+    for x in range(test_count):
+        val = random.randint(1, num - 1)
+        if pow(val, num-1, num) != 1:
+            return False
+    return True
+
+#================== FIND RANDOM PRIME ====================
+def generate_prime(n):
+    found_prime = False
+    while not found_prime:
+        p = random.randint(2**(n-1), 2**n)
+        if is_prime(p, 1000):
+            return p
+
+#================== AGREE UPON G AND P ====================
+def setup(conn, addr):
+    msg = server_recive(conn, addr)
+    if msg == "[ROLL THE DICE!]":
+        g = generate_prime(30)
+        p = generate_prime(10)
+        server_send(conn, addr, str(g))
+        server_send(conn, addr, str(p))
+        print("[PARAMETERS SETUP]")
+        return g, p
+
+
+#================== ROLL DICE ====================
+def roll(conn, addr):
+    d = random.randint(1,6)
+    print(f"[DICE ROLL] = {d}")
+    server_send(conn, addr, str(d))
+    return d
+
+#================== OPEN COMMIT ====================
+def open(g, p, r, a, c):
+    hh = g**a % p
+    cc = (g**a)*(hh**r)
+    return (cc == c)
+
+#================== SEND RESULT ====================
+def result(conn, addr, a, d):
+    if a == d:
+        print("[ALICE GUESSED CORRECT]")
+        server_send(conn, addr, "[ALICE GUESSED CORRECT]")
+    else:
+        print("[ALICE DID NOT GUESS CORRECT]")
+        server_send(conn, addr, "[ALICE DID NOT GUESS CORRECT]")
 
 
 #================== START SERVER ====================
@@ -57,5 +136,7 @@ def start():
 
 
 #================== MAIN ====================
-print("[SERVER STARTING]...")
-start()
+if __name__== "__main__":
+    print("[SERVER STARTING]...")
+    start()
+
