@@ -1,6 +1,7 @@
 #CODE from: https://www.youtube.com/watch?v=3QiPPX-KeSc
 #CODE from: https://gist.github.com/Oborichkin/d8d0c7823fd6db3abeb25f69352a5299 
 #CODE from: https://github.com/bopace/generate-primes/blob/master/prime.py 
+#CERTIFICATES AND KEYS: https://quaint-larkspur-ffd.notion.site/Creating-certificates-ce19c4acddb04c9a80671d46c2bd78b6
 #TLS (SSL) library from: https://docs.python.org/3/library/ssl.html 
 #Passwords to all keys and certs are 112233
 
@@ -8,7 +9,6 @@ import random
 import socket
 import threading
 import ssl
-#To send objects use json or pickle
 
 #================== CONSTANTS ====================
 HEADER = 64
