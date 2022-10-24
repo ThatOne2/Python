@@ -10,7 +10,8 @@ The program works as so:
 - Bob decides on and sends Alice the genarators g and p
 - Alice makes a guess on what she thinks the dice will land on
 - Alice uses these and another random int to hash her guess and sends this hashed guess to Bob
-- Bob rolls a dice and tells Alice what the roll was
+- Both Bob and Alice commits (in the same way as Alices guess) a number that will be used to generate the die roll
+- Alice and Bob both send their numbers so that they can open the random number and calculate the roll
 - Alice sends the unhashed guess and the random int to Bob
 - Bob does the same hashing to see if he gets the same number as Alice's hashed commit
 - If it matches Bob Accepts the guess and tells that to Alice
@@ -26,8 +27,8 @@ Read more:
 ## Running the program
 
 first run the server by
-´´python .\Server.py´´
+´´python .\Bob.py´´
 (It will stay open in a forever loop)
 
 Each time you want Alice to roll a dice you have to run the script:
-´´python .\Client´´
+´´python .\Alice´´
