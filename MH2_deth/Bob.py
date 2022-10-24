@@ -36,21 +36,52 @@ def handle_client(conn, addr):
     c = int(server_recive(conn, addr))
     print("[RECIVED COMMIT]")
     #print(f"[ALICE COMMIT] = {c}")
-    d = roll(conn, addr)
-    r = int(server_recive(conn, addr))
-    a = int(server_recive(conn, addr))
-    print(f"[RECIVED] randint {r}, Alice guess {a}")
-    if open(g, p, r, a, c): 
-        print("[COMMIT ACCEPTED]")
-        server_send(conn, addr, "ACCEPTED")
-        result(conn, addr, a, d)
-    else: 
-        print("[COMMIT NOT ACCEPTED]")
-        server_send(conn, addr, "NOT ACCEPTED")
+    roll = CalcRoll(g, p, conn, addr)
+    if roll != 0: 
+        r = int(server_recive(conn, addr))
+        a = int(server_recive(conn, addr))
+        print(f"[RECIVED] randint {r}, Alice guess {a}")
+        if open(g, p, r, a, c): 
+            print("[COMMIT ACCEPTED]")
+            server_send(conn, addr, "ACCEPTED")
+            result(conn, addr, a, roll)
+        else: 
+            print("[COMMIT NOT ACCEPTED]")
+            server_send(conn, addr, "NOT ACCEPTED")
 
-    print("")
+        print("")
     conn.close() 
  
+#================== CALC DICE ROLL ====================
+def CalcRoll(g, p, conn, addr):
+    print("[1]")
+    bR = random.randint(1, 20)
+    h = g**bR % p 
+    r = generate_prime(5)
+    print("[2]")
+    bC = (g**bR)*(h**r) #Bob contribution to the dice roll
+    aC = int(server_recive(conn, addr))
+    server_send(conn, addr, str(bC))
+    print("[3]")
+    aR = int(server_recive(conn, addr))
+    ar = int(server_recive(conn, addr))
+    print("[4]")
+    server_send(conn, addr, str(bR))
+    server_send(conn, addr, str(r))
+    if open(g, p, ar, aR, aC):
+        print("[5]")
+        isAck = server_recive(conn, addr)
+        server_send(conn, addr, "ACK")
+        print("[6]")
+        if isAck == "ACK":
+            roll = ((aR + bR) % 6) + 1
+            print(f"ROLL WAS: {roll}")
+            return roll
+    else:
+        isAck = server_recive(conn, addr)
+        server_send(conn, addr, "NOT_ACK")
+        print("[7]")
+        return 0
 
 #================== RECIVE MESSAGES ====================
 def server_recive(conn, addr):
@@ -85,31 +116,24 @@ def generate_prime(n):
     found_prime = False
     while not found_prime:
         p = random.randint(2**(n-1), 2**n)
-        if is_prime(p, 1000):
+        if is_prime(p, 100):
             return p
 
 #================== AGREE UPON G AND P ====================
 def setup(conn, addr):
     msg = server_recive(conn, addr)
     if msg == "[ROLL THE DICE!]":
-        g = generate_prime(30)
-        p = generate_prime(10)
+        g = generate_prime(100)
+        p = generate_prime(50)
         server_send(conn, addr, str(g))
         server_send(conn, addr, str(p))
         print("[PARAMETERS SETUP]")
         return g, p
 
 
-#================== ROLL DICE ====================
-def roll(conn, addr):
-    d = random.randint(1,6)
-    print(f"[DICE ROLL] = {d}")
-    server_send(conn, addr, str(d))
-    return d
-
 #================== OPEN COMMIT ====================
 def open(g, p, r, a, c):
-    hh = g**a % p
+    hh = (g**a) % p
     cc = (g**a)*(hh**r)
     return (cc == c)
 
