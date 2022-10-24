@@ -35,6 +35,10 @@ def generate_prime(n):
 
 
 # ================== SERVER CONNECTION ====================
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+context.verify_mode = ssl.CERT_REQUIRED
+context.load_verify_locations('./CA/client.crt')
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
