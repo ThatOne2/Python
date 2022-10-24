@@ -61,7 +61,7 @@ def CalcRoll(g, p, conn, addr):
     h = g**bR % p 
     r = generate_prime(5)
     bC = (g**bR)*(h**r) #Bob contribution to the dice roll
-    aC = int(server_recive(conn, addr))
+    aC = int(server_recive(conn, addr))  #Alice commited contribution to the dice roll
     server_send(conn, addr, str(bC))
     aR = int(server_recive(conn, addr))
     ar = int(server_recive(conn, addr))
@@ -151,8 +151,7 @@ def start():
         conn, addr = server.accept() #Will wait for at new connection
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
-        #If we want to see how many are active (minus -1 because it will count start as one thread):
-        #print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}")
+
 
 
 #================== MAIN ====================
