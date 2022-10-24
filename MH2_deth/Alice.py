@@ -98,16 +98,12 @@ def CalcRoll(g, p):
     send(str(r))
     bR = int(receive())
     br = int(receive())
-    print("[1]")
     if opencommit(g, p, br, bR, bC):
-        print("[2]")
         send("ACK")
-        print("[3]")
         isAck = receive()
-        print("[4]")
         if isAck == "ACK":
             roll = ((aR + bR) % 6) + 1
-            print(f"ROLL WAS: {roll}")
+            print(f"[ROLL WAS]: {roll}")
             return roll
     else:
         send("NOT_ACK")
@@ -117,11 +113,8 @@ def CalcRoll(g, p):
 
 # ================== OPEN COMMIT ====================
 def opencommit(g, p, br, bR, bC):
-    print("[1a]")
     bH = (g ** bR) % p
-    print("[2a]")
     bc = (g ** bR) * (bH ** br)
-    print("[3a]")
     return (bc == bC)
 
 

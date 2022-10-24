@@ -54,33 +54,26 @@ def handle_client(conn, addr):
  
 #================== CALC DICE ROLL ====================
 def CalcRoll(g, p, conn, addr):
-    print("[1]")
     bR = random.randint(1, 20)
     h = g**bR % p 
     r = generate_prime(5)
-    print("[2]")
     bC = (g**bR)*(h**r) #Bob contribution to the dice roll
     aC = int(server_recive(conn, addr))
     server_send(conn, addr, str(bC))
-    print("[3]")
     aR = int(server_recive(conn, addr))
     ar = int(server_recive(conn, addr))
-    print("[4]")
     server_send(conn, addr, str(bR))
     server_send(conn, addr, str(r))
     if open(g, p, ar, aR, aC):
-        print("[5]")
         isAck = server_recive(conn, addr)
         server_send(conn, addr, "ACK")
-        print("[6]")
         if isAck == "ACK":
             roll = ((aR + bR) % 6) + 1
-            print(f"ROLL WAS: {roll}")
+            print(f"[ROLL WAS]: {roll}")
             return roll
     else:
         isAck = server_recive(conn, addr)
         server_send(conn, addr, "NOT_ACK")
-        print("[7]")
         return 0
 
 #================== RECIVE MESSAGES ====================
